@@ -1,6 +1,6 @@
 # docker-php
 
-[![Create and publish a Docker image](https://github.com/4lkaid/docker-php/actions/workflows/docker-publish.yaml/badge.svg)](https://github.com/4lkaid/docker-php/actions/workflows/docker-publish.yaml)
+[![GitHub CI](https://github.com/4lkaid/docker-php/actions/workflows/docker-publish.yaml/badge.svg)](https://github.com/4lkaid/docker-php/actions/workflows/docker-publish.yaml)
 
 This project automates the creation and publishing of a Docker image for PHP. It utilizes GitHub Actions to build, tag, and push the Docker image to a container registry.
 
