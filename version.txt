@@ -1,1 +1,1 @@
-digest=ghcr.io/4lkaid/php@sha256:e7b3b02f16b227b38e45b1808625d3e18e6ca6164aebb53f2364ac13562b760f
+digest=ghcr.io/4lkaid/php@sha256:751b5b9d4a70b8bf01a2b0536b53339f5d70a838af6a6ce1276c82986eaa23b7
