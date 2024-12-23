@@ -26,6 +26,13 @@ jobs:
       - name: Build image
         run: docker build . --file Dockerfile --tag $IMAGE_NAME --label "runnumber=${GITHUB_RUN_ID}"
 
+      - name: Get PHP version
+        id: php-version
+        run: |
+          PHP_VERSION=$(docker run --rm $IMAGE_NAME php -r 'echo PHP_VERSION;')
+          echo "PHP_VERSION=${PHP_VERSION}" >> $GITHUB_ENV
+          echo "PHP_VERSION=$PHP_VERSION"
+
       - name: Log in to registry
         run: echo "${{ secrets.GITHUB_TOKEN }}" | docker login $REGISTRY -u $ --password-stdin
 
@@ -50,6 +57,7 @@ jobs:
       - name: Update version.txt
         run: |
           echo "digest=$(docker inspect --format='{{index .RepoDigests 0}}' $IMAGE_NAME)" > version.txt
+          echo "php_version=${{ env.PHP_VERSION }}" >> version.txt
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
           git add version.txt
