@@ -1,0 +1,66 @@
+name: GitHub CI
+
+on:
+  schedule:
+    - cron: "50 23 * * 0"
+  push:
+    branches:
+      - main
+    paths:
+      - Dockerfile
+  workflow_dispatch:
+
+env:
+  REGISTRY: ghcr.io
+  IMAGE_NAME: php
+
+jobs:
+  build-and-push-image:
+    runs-on: ubuntu-latest
+    permissions:
+      packages: write
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build image
+        run: docker build . --file Dockerfile --tag $IMAGE_NAME --label "runnumber=${GITHUB_RUN_ID}"
+
+      - name: Get PHP version
+        id: php-version
+        run: |
+          PHP_VERSION=$(docker run --rm $IMAGE_NAME php -r 'echo PHP_VERSION;')
+          echo "PHP_VERSION=${PHP_VERSION}" >> $GITHUB_ENV
+          echo "PHP_VERSION=$PHP_VERSION"
+
+      - name: Log in to registry
+        run: echo "${{ secrets.GITHUB_TOKEN }}" | docker login $REGISTRY -u $ --password-stdin
+
+      - name: Push image
+        run: |
+          IMAGE_ID=$REGISTRY/${{ github.repository_owner }}/$IMAGE_NAME
+          IMAGE_ID=$(echo $IMAGE_ID | tr '[A-Z]' '[a-z]')
+          VERSION=$(echo "${{ github.ref }}" | sed -e 's,.*/\(.*\),\1,')
+          [[ "${{ github.ref }}" == "refs/tags/"* ]] && VERSION=$(echo $VERSION | sed -e 's/^v//')
+          [ "$VERSION" == "main" ] && VERSION=latest
+          echo IMAGE_ID=$IMAGE_ID
+          echo VERSION=$VERSION
+          docker tag $IMAGE_NAME $IMAGE_ID:$VERSION
+          docker push $IMAGE_ID:$VERSION
+
+      - uses: actions/delete-package-versions@v5
+        with:
+          package-name: ${{ env.IMAGE_NAME }}
+          package-type: container
+          min-versions-to-keep: 1
+
+      - name: Update Version
+        run: |
+          echo "digest=$(docker inspect --format='{{index .RepoDigests 0}}' $IMAGE_NAME)" > version.txt
+          echo "php_version=${{ env.PHP_VERSION }}" >> version.txt
+          sed -i 's|!\[PHP Version\](.*)|![PHP Version](https://img.shields.io/badge/PHP-${{ env.PHP_VERSION }}-orange)|' README.md
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add version.txt README.md
+          git commit -m "chore: update version"
+          git push
