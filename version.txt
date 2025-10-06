@@ -1,2 +1,2 @@
-digest=ghcr.io/4lkaid/php@sha256:ec6e314a8bd7d861108e9c3c9ba0a0d98398fc9f3594dce75526d40b3f44ba36
+digest=ghcr.io/4lkaid/php@sha256:60c1a613648f416051fb5c5bfefbfd3b1d890e7dabbfede9cebe23f2b972f029
 php_version=8.4.13
